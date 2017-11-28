@@ -7,7 +7,7 @@
 int length;
 const char CHAR[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '(', ')'};
 
-int operate(char op[], int length)
+/*int operate(char op[], int length)
 {
     char op1[256];
     char op2[256];
@@ -126,7 +126,7 @@ int operate(char op[], int length)
 
 
     }
-}
+}*/
 
 /* Valida que el veïnatge de les operacions sigui l'adequat
  * Pre = cert
@@ -185,6 +185,27 @@ bool op_validation(char op[], int length){
     return valid;
 }
 
+int esNumero (char op[], int lenght){
+    int i, j=0;
+    bool fin = false;
+    char num[lenght]; //com a maxim sera de longitud lenght
+    int numFinal;
+    if (op[0]<48 || op[0]>57){ //si no es un numero
+        return -1;
+    }
+    else for (i=0;i<length && !fin;i++){ //si es un numero fem el bucle per a recorrer tot l'array fins al final o fins trobar un simbol
+        if (op[0]<48 || op[0]>57){ //si no es un numero
+            fin=true; //parem de llegir el numero
+        }
+        //guardar el char en un altre char nomes dels numeros
+        else{
+            num[j]=op[i];
+            j++;
+        }
+        numFinal = atoi(num);
+        return numFinal;
+    }
+}
 bool parenthesis_validation (char op[], int lenght){
     int parenthesis=0, i=0;
     while(i<lenght){
@@ -256,7 +277,7 @@ int main()
 
         }
     }
-
+    //esNumero(op, length);
     fclose(f);
     return 0;
 }
