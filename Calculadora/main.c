@@ -7,63 +7,50 @@
 int length;
 const char CHAR[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '(', ')'};
 
-int operate(char op[], int length)
+/*
+* rep una expressió i retorna true si hi troba dos operands.
+* Si només troba 1 operand retorna fals (cas directe)
+*/
+bool esSigne(char c)
 {
-    char op1[256];
-    char op2[256];
-    char nombre[16];
-    int length1;
-    int pos_inici;
-    int pos_final;
-    int nombre1 = -1;
-    int nombre2 = -1;
-    bool llegim_nombre = false;
+    if (c == 42 || c == 43 || c == 45 || c == 47) return true;
+    else return false;
+}
 
-    int i = 0, j = 0;
-    int parentesis = 0;
-    char operand;
+bool trobaOperands(char op[], char opA[], char opB, char *signe, int length)
+{
+    int parentesi = 0; //funciona com una pila per a trobar el parentesi final en el cas que op sigui una expressio
 
-    // considerar cas de parentesis rodejant tota l'expressio
     while (i < length)
     {
-        if (i==0 && op[i] != '(') // en el cas de que comencem a llegir i hi hagi un numero
-        {
-            llegim_nombre = true; // activem el flag de nombre
-        }
-        if (op[i] > 41 && op[i] < 48 && llegim_nombre)  // si trobem el operand vol dir que ja hem llegit el nombre
-        {
-            for (j = 0; j< i-1; j++)
-            {
-                nombre1[j] = op[j]; // copiem el primer operand (en forma de nombre en un array)
-            }
-            operand == op[i];   // obtenim el operand
-            op2 = i-1;          // op2 ens apunta al final del primer operand nombre (unitats del primer operand)
-            nombre1 = atoi(nombre1);    // comvertim a integer i obtenim el primer valor
-        }
         if (op[i] == '(')   // si es un obrir parentesi
         {
-            if (parentesis == 0)    // si es el primer parentesi que obrim
-            {
-                op1 = i;    // guardem la posicio pel final (sempre sera 0)
-            }
-            parentesis++;   // apilem parentesis
+            parentesi++;   // apilem parentesis
         }
         if (op [i] == ')')  // si es un de tancar
         {
-            parentesis--;   // desapilem parentesis
-            if (parentesis == 0)
+            parentesi--;   // desapilem parentesis
+        }
+        if (esSigne(op[i]) && parentesi == 0)
+        {
+            for (j = 0; j =< i; j++) // copiem el contingut de l'operand A a l'array de parametre
             {
-                op2 = i;    // op2 ens apunta al final del primer operand ultim parentesi
-                operand = op[i+1];
-                for (i = pos_inici; i < pos_final; i++)
-                {
-                    op1[j] = op[i];
-                }
-                break;
+                opA[j] = op[j+pos_inici];
             }
         }
     }
-    length1 = op2-op1; // obtenim longitud de l'operand 1 si es tracta de parentesis
+     if (parentesi == 0) // si acabem de trobar el parentesi que tancava el primer llavors
+            {
+                pos_final = i;    // pos_final ens apunta al final del primer operand (ultim parentesi)
+                operador = op[i+1]; // per tant l'operador s'ha de trobar a la següent pal osicio
+                for (j = 0; j =< pos_final-pos_inici; j++) // copiem el contingut de l'operador A a l'operador
+                {
+                    opA[j] = op[j+pos_inici];
+                }
+                i++; // corregim per a que i apunti al signe al igual que en el cas directe
+                break; // sortim
+            }
+    length1 = pos_final-pos_inici; // obtenim longitud de l'operand 1 si es tracta de parentesis
     i++; // i apunta al principi del segon operand
     pos_inici = i;
     parentesis = 0; // hauria de ser 0
@@ -74,15 +61,6 @@ int operate(char op[], int length)
         {
             llegim_nombre = true; // activem el flag de nombre
         }
-        if ((op[i] > 41 && op[i] < 48 || op[i] == '\0') && llegim_nombre)  // si trobem el operand vol dir que ja hem llegit el nombre
-        {
-            for (j = pos_inici; j< i; j++)
-            {
-                nombre2[j] = op[j];
-            }
-            nombre2 = atoi(nombre2);
-
-        }
         if (op[i] == '(')   // si es un obrir parentesi
         {
             if (parentesis == 0)    // si es el primer parentesi que obrim
@@ -91,20 +69,41 @@ int operate(char op[], int length)
             }
             parentesis++;   // apilem parentesis
         }
-        if (op [i] == ')')  // si es un de tancar
+        if (op[i] == ')')  // si es un de tancar
         {
             parentesis--;   // desapilem parentesis
             if (parentesis == 0)
             {
-                pos_final = i;
-                for (j = pos_inici; j < pos_final; j++)
+                pos_final = i;    // pos_final ens apunta al final del segon operand (ultim parentesi)
+                for (j = 0; j =< pos_final-pos_inici; j++) // copiem el contingut de l'array d'operacio a l'opera
                 {
-                    op2[j] = op[j];
+                    opB[j] = op[j+pos_inici];
                 }
-                break;
+                break; // sortim
             }
         }
     }
+}
+
+int operate(char op[], int length)
+{
+    char opA[256];  // conté opA quan aquest es una expressio
+    char opB[256];  // conte opB ""
+    int length_opA;     // longitud de opA
+    int length_opB;     // longitud de opB
+
+    int i = 0, j = 0;   // comptadors
+
+
+    bool llegim_nombre = false;
+    int pos_inici;
+    int pos_final;
+
+/*
+funcio esNumero(char op, int length) return numero //evalua que el primer operand sigui un nombre i si ho es el retorna en orma d'enter, sino retorna -1
+*/
+
+
 
     switch (operand)
     {
@@ -253,7 +252,11 @@ int main()
         length = i;
         if (sintax_validation(op, length) && parenthesis_validation (op, length) && op_validation(op, length))
         {
-
+            printf("\nEl resultat es %i", operate(op, length);
+        }
+        else
+        {
+            printf ("\nAlguna de les proves de validació no s'ha dut a terme satisfactoriament. Abortant.")
         }
     }
 
