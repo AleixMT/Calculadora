@@ -1,7 +1,8 @@
 # depslib dependency file v1.0
-1512228162 source:d:\github\calculadora\calculadora\main.c
+1512420993 source:d:\github\calculadora\calculadora\main.c
 	<stdio.h>
 	<stdlib.h>
 	<String.h>
 	<stdbool.h>
+	<math.h>
 

@@ -3,6 +3,7 @@
 #include <String.h>
 // https://es.wikipedia.org/wiki/String.h
 #include <stdbool.h>
+#include <math.h>
 
 /*
 * Anomenem EXPRESSIÓ a tot el que no sigui un nombre, es a dir, tot allo que té la forma A op B, sent A o B al seu torn, EXPRESSIONS o NOMBRES
@@ -15,13 +16,15 @@
 */
 
 /*
-* rep un caracter i retorna true si es un OPERADOR.
-* sino retorna fals
+* rep un caracter i retorna >0 si es un OPERAND, tot indicant la seva prioritat
+* sino retorna 0
 */
-bool esSigne(char c)
+int esSigne(char c)
 {
-    if (c == 42 || c == 43 || c == 45 || c == 47) return true;
-    else return false;
+    if (c == 94) return 3; // si es una potencia retornem 3
+    if (c == 47 || c == 42 || c == 37) return 2; // si es una multiplicacio o una divisio o una operacio de modul
+    if (c == 43 || c == 45) return 1;
+    return 0;
 }
 
 /*
@@ -69,6 +72,70 @@ void trobaOperands(char op[], int length, char opA[], char opB[], int *lengthA, 
 }
 
 /*
+* Degut a que podem tenir més de dos OPERANDS s'ha dissenyat la següent funcio que permet aplicar prioritat d'operacions afegint parentesi.
+* Per tant, de la fase 1 a la 2 no hem modificat la funcio opera, sino que simplement hem afegit aquesta funcio que afegeix aquesta funcionalitat.
+*
+* Cal veure que si tenim mes de 3 OPERANDS a la mateixa altura la casuistica es la mateixa, ja que tot ens porta a una casuistica de tenir
+* 3 OPERANDS.
+* Per a entendre la seva casuistica de la funcio cal entendre que l'avaluador d'expressions en la fase 1 llegeix sempre de dreta a esquerra
+* si no hi ha parentesis de prioritat. Pel que totes les expressions A op B op C s'avaluen com A op (B op C). Sabent aixo els casos que poden existir:
+* A op B op C | A OP B OP C -> Indiferent, de dreta a esquerra la prioritat es la mateixa
+* A op B OP C -> segueix la prioritat d'operacio implicita en la funcio opera
+* A OP B op C -> L'únic cas que cal tractar, ja que si no afegim parentesi explicits l'EXPRESSIO s'avaluara com A OP (B op C), de manera incorrecta
+* PRE = cert
+* POST = si l'expressio es del tipus A OP B op C, afegeix els parentesis explicits de la següet manera -> (A OP B) op C per a que es compleixi
+* la jerarquia d'operacions
+*/
+void prioritzaOperacions(char op[], int *length)
+{
+    int signe1, signe2, i, parentesi=0, pos_signe_ini = -1, pos_signe_fi = -1;
+
+    for (i = 0; i < (*length); i++)
+    {
+        if (op[i] == '(') parentesi++;   //si es un obrir parentesi apilem parentesis
+        if (op [i] == ')') parentesi--;   //  si es un de tancar desapilem parentesis
+        if (parentesi == 0 && esSigne(op[i])) // si trobem una operacio
+        {
+            if (pos_signe_ini == -1)  // si no hem iniciat el punter del primer signe l'inicialitzem
+            {
+                pos_signe_ini = i; // salvem index al primer signe
+            }
+            else // si ja hem inicialitzat punter inicial
+            {
+                pos_signe_fi = i; // salvem index al segon signe
+                break;  // sortim del bucle
+            }
+        }
+    }
+    if (pos_signe_fi == -1) return; // Si no hem trobat el segon signe llavors sortim
+
+    if ( (signe1 = esSigne(op[pos_signe_ini])) != (signe2 = esSigne(op[pos_signe_fi])) )
+    {
+        if (signe1 > signe2) // si la prioritat del primer signe es major llavors si que hem de fer alguna cosa
+        {
+            (*length) = (*length) + 2; // anem a afegir un parell de parentesi per tant augmentem la quantitat de caracters en 2
+            for (i = (*length) - 2; i >= 0; i--) // desplacem fins a la primera posicio
+            {
+                op[i+1] = op[i];
+            }
+            op[0] = '('; // afegim el primer parentesi
+            pos_signe_fi++; // corregim un degut al primer deplaçament
+            for (i = (*length) - 2; i >= pos_signe_fi; i--) // desplacem fins al segon signe incloentlo
+            {
+                op[i+1] = op[i];
+            }
+            op[pos_signe_fi]= ')'; // afegim parentesi
+            return; // sortim
+        }
+        else return; // si la prioritat del segon signe es mejor no fem res perque es fa automaticament (de dreta a esquerra)
+    }
+    else return; // si els signes son de igual prioritat sortim perque no cal fer res
+
+
+
+}
+
+/*
 * Pre= L'expressio rebuda per op es correcta i pot contenir parentesis redundants rodejantla
 * Post = l'expressio retornada no conte parentesis redundants en els extrems i length ha disminuit tants cops com parentesis eliminats
 */
@@ -103,27 +170,29 @@ void eliminaParentesi(char op[], int *length)
 * PRE = rep una expressio sense errors
 * POST = calcula l'expressio rebuda i retorna el seu valor
 */
-int operate(char op[], int length)
+int operate(char op[], int *length)
 {
     char opA[256], opB[256], operador;  // conte els operands
     int length_opA, length_opB, num, divisor;     // longitud de opA, opB, i el nombre si hem rebut una EXPRESSIO que es un NOMBRE
 
-    eliminaParentesi(op, &length); // eliminem parentesis redundants sobre l'expressio
-    if ((num = esNumero(op, length)) != -1) return num; // cas directe, si l'EXPRESSIO rebuda es tracta d'un NOMBRE el retornem
-    else trobaOperands(op, length, opA, opB, &length_opA, &length_opB, &operador); // cas no directe, descomposem l'expressio
+    eliminaParentesi(op, length); // eliminem parentesis redundants sobre l'expressio
+    prioritzaOperacions(op, length);
+    if ((num = esNumero(op, *length)) != -1) return num; // cas directe, si l'EXPRESSIO rebuda es tracta d'un NOMBRE el retornem
+    else trobaOperands(op, *length, opA, opB, &length_opA, &length_opB, &operador); // cas no directe, descomposem l'expressio
     switch (operador) // segons l'operador fem una determinada operacio
     {
-    case '+': return operate(opA, length_opA) + operate(opB, length_opB);
-    case '-': return operate(opA, length_opA) - operate(opB, length_opB);
-    case '*': return operate(opA, length_opA) * operate(opB, length_opB);
+    case '+': return operate(opA, &length_opA) + operate(opB, &length_opB);
+    case '-': return operate(opA, &length_opA) - operate(opB, &length_opB);
+    case '*': return operate(opA, &length_opA) * operate(opB, &length_opB);
     case '/':
-        if ((divisor = operate(opB, length_opB))!= 0) return operate(opA, length_opA) / divisor;
+        if ((divisor = operate(opB, &length_opB))!= 0) return operate(opA, &length_opA) / divisor;
         else
         {
             printf("\nExcepcio aritmetica, s'ha intentat dividir per 0, canviem el 0 per un 1");
-            return operate(opA, length_opA);
+            return operate(opA, &length_opA);
         }
-    case '%': return operate(opA, length_opA) % operate(opB, length_opB); // cas extra, operacio modul
+    case '%': return operate(opA, &length_opA) % operate(opB, &length_opB); // cas extra, operacio modul
+    case '^': return pow (operate(opA, &length_opA), operate(opB, &length_opB)); // cas extra, operacio potencia
     default: return -1; // per evitar el warning del compilador
     }
 }
@@ -171,11 +240,11 @@ bool sintax_validation(char op[], int length)
 bool op_validation(char op[], int length){
     int j, i=0;
     bool correcte= false;
-    char caracters_permesos[17] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '%', '(', ')'};
+    char caracters_permesos[18] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '%', '(', ')','^'};
 
     for (i = 0; i< length; i++)
     {
-        for (j = 0; j < 17; j++)
+        for (j = 0; j < 18; j++)
         {
             if (op[i] == caracters_permesos[j])
             {
@@ -264,7 +333,7 @@ int main()
         }
         if (sintax_validation(op, length) && parenthesis_validation(op, length) && op_validation(op, length))
         {
-            printf("\nEl resultat es %i\n", operate(op, length));
+            printf("\nEl resultat es %i\n", operate(op, &length));
         }
         else
         {
