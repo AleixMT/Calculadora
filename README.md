@@ -9,10 +9,10 @@ The algorithm will show the results in the standard output.
 
 ## About the Calculator
 The Calculator works in the same way as a compiler, as it has severals phases to treat an operation:
-· Check that all symbols in the entrance file are correct
-· Check that the parenthesys make sense, being the redundant parenthesis accepted by the algorithm.
-· Check that the meaning of the operations is okay, having every symbol separated by another with a number.
-· A recursive process starts, that digests the expression using recursivity. On every iteration:
+* Check that all symbols in the entrance file are correct
+* Check that the parenthesys make sense, being the redundant parenthesis accepted by the algorithm.
+* Check that the meaning of the operations is okay, having every symbol separated by another with a number.
+* A recursive process starts, that digests the expression using recursivity. On every iteration:
   1. Parenthesis are deleted.
   2. The operation to calcule is selected.
   3. Due to recursion two things can happen:
