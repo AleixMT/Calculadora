@@ -16,8 +16,8 @@ The Calculator works in the same way as a compiler, as it has severals phases to
   1. Parenthesis are deleted.
   2. The operation to calcule is selected.
   3. Due to recursion two things can happen:
-    · One or two recursive calls are made to split the expression in smaller parts.
-    · An operation of one single operator is done (e.g. 3+5 ), and the result is returned to the calling function, returning from the recursive call.
+    * One or two recursive calls are made to split the expression in smaller parts.
+    * An operation of one single operator is done (e.g. 3+5 ), and the result is returned to the calling function, returning from the recursive call.
 
 ## Examples of usage
 ```
@@ -29,7 +29,7 @@ The Calculator works in the same way as a compiler, as it has severals phases to
 (20-2)*(((10+2)+5)+5)
 (3*(10+2))+((5+4)*(20-2))
 ```
-· You can also use the calculator to check if an arithmeetical expression is correct.
+* You can also use the calculator to check if an arithmeetical expression is correct.
 
 ## Documentation
 You can find more documentation in the coments of the C code and in the "Documentació" folder of the repository, in catalan.
