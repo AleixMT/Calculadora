@@ -2,11 +2,13 @@
 Calculator of combinated operations using integers. 
 
 ## Usage
+The algorithm reads the input from the text file "proves.txt".
 You can use parenthesis () for priority, and the operators + - * / % ^ are available.
 Write your query expressions in a text file and execute the program.
+The algorithm will show the results in the standard output.
 
 ## About the Calculator
-The Calculator works in the same way as a compiler. Has severals phases to treat an operation:
+The Calculator works in the same way as a compiler, as it has severals phases to treat an operation:
 · Check that all symbols in the entrance file are correct
 · Check that the parenthesys make sense, being the redundant parenthesis accepted by the algorithm.
 · Check that the meaning of the operations is okay, having every symbol separated by another with a number.
@@ -28,6 +30,9 @@ The Calculator works in the same way as a compiler. Has severals phases to treat
 (3*(10+2))+((5+4)*(20-2))
 ```
 · You can also use the calculator to check if an arithmeetical expression is correct.
+
+## Documentation
+You can find more documentation in the coments of the C code and in the "Documentació" folder of the repository, in catalan.
 
 ## Authors
 
